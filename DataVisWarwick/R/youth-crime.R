@@ -45,6 +45,20 @@ crimeTypeTotal <- group_by(crimeType, type) |>
     summarise(total = sum(count)) |>
     mutate(prop = total/sum(total))
 
+crimeDivision <- read.csv("../Data/YouthCrime/crime-type.csv")
+other <- !(crimeDivision$type %in%
+           c("Theft", "Causing injury", "Unlawful entry, burglary",
+             "Dangerous acts", "Public disorder", "Property damage"))
+crimeDivision$type[other] <- "Other"
+crimeDivision <- aggregate(crimeDivision["count"],
+                           list(year=crimeDivision$year,
+                                type=crimeDivision$type),
+                           sum)
+crimeDivision <- subset(crimeDivision, year == 2021)
+crimeDivision$prop <- crimeDivision$count/sum(crimeDivision$count)
+crimeDivision$typeFactor <- factor(crimeDivision$type)
+
+
 crimeDistrict <- read.csv("../Data/YouthCrime/crime-district.csv") |>
     ## For joining with map data
     mutate(district = gsub("Bay Of Plenty", "Bay of Plenty",
